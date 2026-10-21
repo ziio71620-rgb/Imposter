@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#c1272d">
+<link rel="icon" href="icon-192.png">
+<title>تحميل الإمبوستر المغربي</title>
+<style>
+:root{--bg:#fbf5e9;--card:#fff;--fg:#2a1f14;--muted:#7a6a58;--red:#c1272d;--green:#006233;--gold:#d9a441;--line:#e6d9c0;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1510;--card:#2a2118;--fg:#f6ecd9;--muted:#b8a78f;--red:#e5484d;--green:#3fb67a;--gold:#e8b857;--line:#443626;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",system-ui,sans-serif;line-height:1.6;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.hero{background:linear-gradient(160deg,var(--red),#7a1519);color:#fff;text-align:center;padding:36px 20px 44px;border-radius:0 0 32px 32px}
+.hero img{width:104px;height:104px;border-radius:26px;box-shadow:0 10px 30px #0006}
+.hero h1{margin:14px 0 4px;font-size:30px}
+.hero p{margin:0;opacity:.92}
+.wrap{max-width:480px;margin:0 auto;padding:18px}
+.btn{display:block;width:100%;text-align:center;text-decoration:none;border:0;border-radius:14px;padding:16px;font:inherit;font-size:18px;font-weight:700;margin-bottom:10px;cursor:pointer}
+.main{background:var(--green);color:#fff}
+.alt{background:var(--card);color:var(--fg);border:1px solid var(--line)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:16px}
+.card h2{margin:0 0 8px;font-size:17px}
+.card ol{margin:0;padding-inline-start:20px}
+.muted{color:var(--muted);font-size:14px}
+.by{text-align:center;margin:24px 0 8px;color:var(--muted)}
+.by b{color:var(--gold);direction:ltr;unicode-bidi:embed}
+.band{height:6px;border-radius:3px;background:repeating-linear-gradient(90deg,var(--red) 0 24px,var(--green) 24px 48px,var(--gold) 48px 56px);margin:0 18px}
+</style>
+</head>
+<body>
+<div class="hero">
+  <img src="icon-512.png" alt="أيقونة الإمبوستر المغربي">
+  <h1>الإمبوستر المغربي</h1>
+  <p>لعبة جماعية بالدارجة، شكون فيكم الإمبوستر؟ 🕵️</p>
+</div>
+<div class="wrap">
+  <a class="btn main" id="apk" href="imposter.apk" download>⬇️ تحميل التطبيق (أندرويد APK)</a>
+  <button class="btn alt" id="install" hidden>📲 تثبيت من المتصفح</button>
+  <a class="btn alt" href="./">🎮 العب مباشرة بلا تحميل</a>
+  <button class="btn alt" id="share">🔗 شارك الرابط مع صحابك</button>
+
+  <div class="card">
+    <h2>📱 كيفاش تثبّت الـAPK على أندرويد</h2>
+    <ol>
+      <li>كليكي على زر التحميل، و تسنى حتى يسالي.</li>
+      <li>حل الملف من إشعار التحميلات ولا من تطبيق «الملفات».</li>
+      <li>إلا طلب منك الإذن، فعّل «السماح بالتثبيت من هاد المصدر».</li>
+      <li>كليكي <b>تثبيت</b>، و غادي تبان الأيقونة فالشاشة الرئيسية.</li>
+    </ol>
+    <p class="muted">ممكن يطلع تحذير «هاد الملف يمكن يضر بالهاتف»، هادشي عادي مع أي تطبيق ماشي من Play Store.</p>
+  </div>
+  <div class="card">
+    <h2>🍎 فآيفون</h2>
+    <p class="muted" style="margin:0">ما كاينش APK فآيفون. حل الرابط فـSafari ← زر المشاركة ← «إضافة إلى الشاشة الرئيسية».</p>
+  </div>
+  <p class="by">صنع بكل ❤️ من طرف <b>Zakaria Ellyazghi</b> 🇲🇦</p>
+</div>
+<div class="band"></div>
+<script>
+let dp=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;document.getElementById("install").hidden=false});
+document.getElementById("install").onclick=async()=>{if(!dp)return;dp.prompt();try{await dp.userChoice}catch(e){}dp=null;document.getElementById("install").hidden=true};
+document.getElementById("share").onclick=async()=>{
+  const u=location.href;
+  try{if(navigator.share){await navigator.share({title:"الإمبوستر المغربي",text:"جرّب هاد اللعبة مع صحابك 🕵️",url:u})}
+  else{await navigator.clipboard.writeText(u);alert("تنسخ الرابط ✔️")}}catch(e){}
+};
+</script>
+</body>
+</html>
