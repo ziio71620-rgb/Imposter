@@ -6,56 +6,7 @@
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#c1272d"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="إمبوستر">
 <title>الإمبوستر المغربي</title>
-<style>
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
---bg:#fbf5e9;--card:#ffffff;--fg:#2a1f14;--muted:#7a6a58;--red:#c1272d;--green:#006233;--gold:#d9a441;--line:#e6d9c0;color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1510;--card:#2a2118;--fg:#f6ecd9;--muted:#b8a78f;--red:#e5484d;--green:#3fb67a;--gold:#e8b857;--line:#443626;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#1b1510;--card:#2a2118;--fg:#f6ecd9;--muted:#b8a78f;--red:#e5484d;--green:#3fb67a;--gold:#e8b857;--line:#443626;color-scheme:dark}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",system-ui,sans-serif;line-height:1.5}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
-.wrap{max-width:480px;margin:0 auto;padding:16px}
-h1{text-align:center;margin:8px 0 2px;font-size:28px;color:var(--red)}
-.sub{text-align:center;color:var(--muted);margin:0 0 14px}
-.band{height:6px;border-radius:3px;background:repeating-linear-gradient(90deg,var(--red) 0 24px,var(--green) 24px 48px,var(--gold) 48px 56px);margin-bottom:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
-.card h2{margin:0 0 10px;font-size:17px}
-.row{display:flex;gap:8px}
-input[type=text],textarea{flex:1;min-width:0;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:16px}
-button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 16px;background:var(--green);color:#fff;font-weight:700}
-button.red{background:var(--red)}button.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
-button.big{width:100%;padding:16px;font-size:18px}
-button:disabled{opacity:.45}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-weight:500}
-.chip.on{background:var(--gold);color:#2a1f14;border-color:var(--gold);font-weight:700}
-.pl{display:flex;align-items:center;gap:6px;padding:8px 6px 8px 12px;border-radius:999px;background:var(--bg);border:1px solid var(--line)}
-.pl button{padding:2px 9px;background:transparent;color:var(--red);font-size:16px}
-.opt{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
-.opt select{padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit}
-.center{text-align:center}
-.who{font-size:26px;font-weight:800;margin:8px 0}
-.role{border-radius:20px;padding:26px 12px;margin:14px 0;border:2px dashed var(--gold);background:var(--bg)}
-.word{font-size:40px;font-weight:800;color:var(--green)}
-.imp{font-size:34px;font-weight:800;color:var(--red)}
-.timer{font-size:54px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--red)}
-.vote{width:100%;margin:6px 0;background:var(--bg);color:var(--fg);border:2px solid var(--line);text-align:start}
-.vote.sel{border-color:var(--red);background:var(--red);color:#fff}
-.muted{color:var(--muted);font-size:14px}
-.hide{display:none!important}
-#intro{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,var(--red),#7a1519);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
-#intro .logo{width:120px;height:120px;border-radius:28px;box-shadow:0 10px 30px #0006;animation:pop .8s ease both}
-#intro h1{color:#fff;font-size:34px;margin:18px 0 4px;animation:up .8s .2s ease both}
-#intro .by{opacity:.95;animation:up .8s .5s ease both}
-#intro .by b{display:block;font-size:24px;color:var(--gold);direction:ltr;margin-top:4px}
-#intro button{margin-top:28px;background:var(--gold);color:#2a1f14;font-size:18px;padding:14px 40px;animation:up .8s .8s ease both}
-@keyframes pop{from{transform:scale(.3) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
-@keyframes up{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
-#modal{position:fixed;inset:0;z-index:40;background:#0008;display:flex;align-items:flex-end;justify-content:center}
-#modal .sheet{background:var(--bg);color:var(--fg);width:100%;max-width:480px;max-height:88%;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
-#gear{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:10px;z-index:5;padding:6px 10px}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="intro">
@@ -104,6 +55,7 @@ button:disabled{opacity:.45}
     </div>
     <div class="card muted">📲 <b>باش تحملها فهاتفك:</b> حفظ الملف ثم فتحو بالمتصفح (كيخدم بلا نيت). فآيفون: Safari ← مشاركة ← «إضافة إلى الشاشة الرئيسية». فأندرويد: Chrome ← ⋮ ← «إضافة إلى الشاشة الرئيسية».</div>
     <p class="muted center">صنع بكل ❤️ من طرف <b dir="ltr">Zakaria Ellyazghi</b> 🇲🇦</p>
+    <button class="big ghost" onclick="location.href='online.html'" style="margin-bottom:10px">🌐 العب أونلاين مع صحابك (كل واحد بهاتفو)</button>
     <button class="big red" id="start" disabled>🎬 بدا اللعب</button>
   </section>
 
@@ -154,22 +106,8 @@ button:disabled{opacity:.45}
   </section>
 </div>
 
+<script src="words.js"></script>
 <script>
-const WORDS={
-"🎲 مخلوط":null,
-"🍲 الماكلة":["طاجين","كسكس","حريرة","بسطيلة","رفيسة","مسمن","بغرير","سفة","طنجية","شباكية","بيصارة","زعلوك","سلو","حرشة","لوبيا"],
-"🏙️ مدن و أماكن":["مراكش","فاس","شفشاون","الصويرة","أكادير","طنجة","ساحة جامع الفنا","مسجد الحسن الثاني","الداخلة","ورزازات","الرباط","مولاي يعقوب","إفران","باب المنصور","كورنيش عين الذئاب"],
-"🧕 لبسة و تقاليد":["جلابة","قفطان","بلغة","طربوش","زليج","حنة","عمارية","تكشيطة","فانوس","برّاد أتاي","كاس أتاي","زربية","تقاشر","ختان","العقيقة"],
-"🎶 كرة و فن":["الرجاء","الوداد","أسود الأطلس","كناوة","العيطة","الشعبي","الگمبري","دقة مراكشية","الدرجة الثالثة","الملعب","الجمهور","الدرب","هدف في الدقيقة 90","ركلة جزاء","الحكم"],
-"🛍️ الحياة اليومية":["الحانوت","الحمام","الفران","الطوبيس","الطاكسي الصغير","السوق","الموقف","العرس","كراج","مقهى","الجنان","الدار","العطلة","السطح","الشواية"],
-"🌙 رمضان و الأعياد":["الفطور","السحور","التمر","عيد الأضحى","الكبش","العيدية","الشباكية","التراويح","المدفع","عاشوراء","الزكاة","ليلة القدر"],
-"🐪 الطبيعة و الحيوانات":["الجمل","شجرة الأركان","الأطلس","الصحراء","الماكاك","اللقلاق","الحمار","السردين","الواحة","الثلج","الغزال","الفلامنغو"],
-"🍰 حلويات و مشروبات":["أتاي بالنعناع","عصير الأفوكا","غريبة","كعب الغزال","سفنج","ملاوي","نص نص","لبن","رايب","فقاص","ماء الزهر","عسل"],
-"🚌 النقل و السفر":["الطرامواي","البراق","الكار","الباطو","المطار","الطوبيس","الطاكسي الكبير","الأوطوروت","الموطور","الحدود","الباسبور","الكارط"],
-"📱 الأنترنت و التيك":["الواتساب","التيكتوك","اليوتوب","الستوري","الواي فاي","الشارجور","الإنستا","البلوكاج","الميم","السيلفي","الفلوكس","الكوميونتي"],
-"🎓 المدرسة و الخدمة":["الباك","الأستاذ","المحفظة","الكناش","الطابلة","الامتحان","الوظيفة","الراتب","الباطرون","الإدارة","الدوسي","الكونكور"],
-"✍️ كلماتي":[]
-};
 const $=id=>document.getElementById(id);
 const S={players:[],cat:"🎲 مخلوط",roles:[],impostors:[],word:"",idx:0,sel:null,tick:null,scores:{}};
 let ST={theme:"auto",size:"1",color:"",vib:"1",shown:"0",cp:"1",ip:"2",impn:"1",mins:"3",hint:"1",cat:""};

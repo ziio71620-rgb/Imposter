@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#c1272d">
+<link rel="icon" href="icon-192.png">
+<title>الإمبوستر المغربي · أونلاين</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.code{font-size:44px;font-weight:800;letter-spacing:8px;color:var(--red);direction:ltr}
+.pl.me{outline:2px solid var(--gold)}
+#toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:12px;z-index:30;max-width:90%}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🌐 إمبوستر أونلاين</h1>
+  <p class="sub" id="conn">كل واحد بهاتفو، و الكود يجمعكم</p>
+  <div class="band"></div>
+
+  <section id="v-home">
+    <div class="card"><h2>🙋 سميتك</h2><input type="text" id="nm" maxlength="14" placeholder="كتب سميتك" style="width:100%"></div>
+    <div class="card">
+      <button class="big red" id="mk">🏠 صاوب غرفة جديدة</button>
+      <p class="muted center">ولا دخل بكود الغرفة</p>
+      <div class="row"><input type="text" id="cd" maxlength="5" placeholder="الكود" style="direction:ltr;text-transform:uppercase"><button id="jn">دخول</button></div>
+    </div>
+    <button class="big ghost" onclick="location.href='./'">🎮 اللعب على هاتف واحد</button>
+    <p class="muted center">صنع بكل ❤️ من طرف <b dir="ltr">Zakaria Ellyazghi</b> 🇲🇦</p>
+  </section>
+
+  <section id="v-lobby" class="hide">
+    <div class="card center"><div class="muted">كود الغرفة</div><div class="code" id="rc"></div><button class="ghost" id="shr">🔗 شارك الرابط</button></div>
+    <div class="card"><h2>👥 اللاعبين</h2><div class="chips" id="pl"></div><p class="muted hide" id="late">الجولة جارية، غادي تدخل فالجولة الجاية.</p></div>
+    <div class="card" id="hostBox">
+      <h2>⚙️ إعدادات الغرفة</h2>
+      <div class="opt"><span>الموضوع</span><select id="cfgCat"></select></div>
+      <div class="opt"><span>عدد الإمبوسترات</span><select id="cfgImp"><option>1</option><option>2</option><option>3</option></select></div>
+      <div class="opt"><span>مدة النقاش</span><select id="cfgMins"><option value="1">دقيقة</option><option value="2">دقيقتين</option><option value="3">3 دقايق</option><option value="5">5 دقايق</option><option value="0">بلا تايمر</option></select></div>
+      <div class="opt"><span>الإمبوستر يشوف الموضوع</span><select id="cfgHint"><option value="1">إيه</option><option value="0">لا</option></select></div>
+      <button class="big red" id="go" style="margin-top:8px">🎬 بدا اللعب</button>
+    </div>
+    <p class="muted center" id="waitBox">تسنى المضيف يبدا اللعبة…</p>
+    <button class="big ghost" id="lv">🚪 خرج</button>
+  </section>
+
+  <section id="v-play" class="hide">
+    <div class="card center"><div class="role" id="rb"></div><button class="ghost" id="rt">👀 شوف الدور</button></div>
+    <div class="card center">
+      <div class="muted">اللي يبدا السؤال</div><div class="who" id="who"></div>
+      <div class="timer" id="tm"></div>
+      <button class="big red hide" id="gv">🗳️ التصويت</button>
+    </div>
+  </section>
+
+  <section id="v-vote" class="hide">
+    <div class="card"><h2>شكون هو الإمبوستر؟</h2><div id="vt"></div><p class="muted center" id="vc"></p>
+      <button class="big red hide" id="fin">✅ كشف النتيجة</button></div>
+  </section>
+
+  <section id="v-end" class="hide">
+    <div class="card center">
+      <div class="who" id="vd"></div>
+      <p>الكلمة كانت</p><div class="word" id="eword"></div>
+      <p>الإمبوستر/ات</p><div class="imp" id="eimps"></div>
+      <h2 style="margin-top:14px">🏆 النقاط</h2><div id="board" style="text-align:start;margin-bottom:12px"></div>
+      <button class="big hide" id="again">🔁 جولة جديدة</button>
+      <p class="muted hide" id="wnext">تسنى المضيف يبدا جولة جديدة…</p>
+    </div>
+  </section>
+</div>
+<div id="toast" class="hide"></div>
+<script src="mqtt.min.js"></script>
+<script src="words.js"></script>
+<script>
+const $=id=>document.getElementById(id),pick=a=>a[Math.floor(Math.random()*a.length)];
+const BR=["wss://broker.emqx.io:8084/mqtt","wss://broker.hivemq.com:8884/mqtt","wss://test.mosquitto.org:8081"];
+let ST={};try{ST=JSON.parse(localStorage.getItem("imp-st")||"{}")}catch(e){}
+{const r=document.documentElement;if(ST.theme&&ST.theme!=="auto")r.setAttribute("data-theme",ST.theme);if(ST.color)r.style.setProperty("--red",ST.color);if(ST.size)document.querySelector(".wrap").style.zoom=ST.size}
+const me={id:Math.random().toString(36).slice(2,10),name:"",host:false,room:"",r:null};
+let G=null,hs=null,cli=null,bi=0,tEnd=null,shown=false,myVote=null,lastPh="",lastRd=-1,lastReq=0;
+const T=s=>"imp-maroc/v1/"+me.room+"/"+s;
+const pub=(t,o)=>{if(cli&&cli.connected)cli.publish(t,JSON.stringify(o))};
+function toast(m){const t=$("toast");t.textContent=m;t.classList.remove("hide");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.add("hide"),2800)}
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function sh(v){["home","lobby","play","vote","end"].forEach(x=>$("v-"+x).classList.toggle("hide",x!==v))}
+const nameOf=id=>(G.players.find(p=>p.id===id)||{name:"؟"}).name;
+
+/* ---------- الاتصال ---------- */
+function connect(on){
+  const c=mqtt.connect(BR[bi%BR.length],{clientId:"imp"+me.id+Math.random().toString(36).slice(2,5),reconnectPeriod:2500,connectTimeout:6000});
+  cli=c;let ok=false;
+  c.on("connect",()=>{ok=true;$("conn").textContent="🟢 متصل";on()});
+  c.on("offline",()=>{$("conn").textContent="🔴 كنعاود نتصل…"});
+  c.on("error",()=>{});
+  c.on("message",(t,m)=>{let o;try{o=JSON.parse(m.toString())}catch(e){return}onMsg(t,o)});
+  setTimeout(()=>{if(!ok){c.end(true);bi++;if(bi<6)connect(on);else toast("ما قدرتش نتصل بالسيرفر، عاود من بعد")}},7000);
+}
+function begin(){
+  try{localStorage.setItem("imp-name",me.name)}catch(e){}
+  $("mk").disabled=$("jn").disabled=true;$("conn").textContent="كنتصل…";
+  connect(()=>{cli.subscribe(T("state"));cli.subscribe(T("to/"+me.id));if(me.host){cli.subscribe(T("up"));bc()}else join(1)});
+  if(!me.host)setTimeout(()=>{if(!G){toast("الغرفة ما لقيتهاش");setTimeout(()=>location.reload(),1500)}},25000);
+}
+const join=f=>pub(T("up"),{t:"join",id:me.id,name:me.name,first:f});
+function onMsg(t,o){
+  if(t===T("up")){if(me.host)hostMsg(o);return}
+  if(t===T("state")){if(me.host)return;G=o;if(o.phase==="play")tEnd=o.left==null?null:Date.now()+o.left;render();return}
+  if(t===T("to/"+me.id)&&o.t==="role"){me.r=o;render()}
+}
+
+/* ---------- المضيف ---------- */
+function bc(){
+  const h=hs,s={phase:h.phase,players:h.players.map(p=>({id:p.id,name:p.name})),host:h.host,cfg:h.cfg,round:h.round,scores:h.scores,starter:h.starter,left:h.endAt?Math.max(0,h.endAt-Date.now()):null,voted:Object.keys(h.votes),res:h.phase==="end"?h.res:null};
+  pub(T("state"),s);G=s;if(s.phase==="play")tEnd=s.left==null?null:Date.now()+s.left;render();
+}
+function sendRole(id){
+  const h=hs;if(!h.imps)return;
+  pub(T("to/"+id),h.imps.includes(id)?{t:"role",r:h.round,imp:1,cat:h.cfg.hint==="1"?h.cat:null}:{t:"role",r:h.round,imp:0,word:h.word,cat:h.cat});
+}
+function hostMsg(o){
+  const h=hs;
+  if(o.t==="join"){
+    const p=h.players.find(x=>x.id===o.id);
+    if(p){p.seen=Date.now();p.name=o.name;if(h.phase!=="lobby")sendRole(o.id)}
+    else if(h.phase==="lobby"){h.players.push({id:o.id,name:o.name,seen:Date.now()});o.first=1}
+    else if(!h.queue.some(x=>x.id===o.id))h.queue.push({id:o.id,name:o.name,seen:Date.now()});
+    if(o.first)bc();
+  }else if(o.t==="role?")sendRole(o.id);
+  else if(o.t==="leave"){h.players=h.players.filter(x=>x.id!==o.id);h.queue=h.queue.filter(x=>x.id!==o.id);bc()}
+  else if(o.t==="vote"&&h.phase==="vote"&&h.players.some(x=>x.id===o.id)){
+    h.votes[o.id]=o.to;bc();if(Object.keys(h.votes).length>=h.players.length)hostFinish();
+  }
+}
+function hostStart(){
+  const h=hs;if(h.players.length<3){toast("خاصكم 3 لاعبين على الأقل");return}
+  let cat=h.cfg.cat;
+  if(!WORDS[cat]||!WORDS[cat].length)cat=pick(Object.keys(WORDS).filter(k=>WORDS[k]&&WORDS[k].length));
+  h.cat=cat;h.word=pick(WORDS[cat]);h.round++;
+  const n=Math.min(+h.cfg.imp,Math.max(1,Math.floor((h.players.length-1)/2)));
+  h.imps=h.players.map(p=>p.id).sort(()=>Math.random()-.5).slice(0,n);
+  h.players.forEach(p=>sendRole(p.id));
+  h.phase="play";h.votes={};h.starter=pick(h.players).name;h.endAt=+h.cfg.mins?Date.now()+h.cfg.mins*60000:null;bc();
+}
+function hostVote(){hs.phase="vote";hs.votes={};hs.endAt=null;bc()}
+function hostFinish(){
+  const h=hs;if(h.phase!=="vote")return;
+  const c={};Object.values(h.votes).forEach(t=>c[t]=(c[t]||0)+1);
+  const m=Math.max(0,...Object.values(c)),top=Object.keys(c).filter(k=>c[k]===m&&m>0);
+  const acc=top.length===1?top[0]:null,crewWin=!!acc&&h.imps.includes(acc);
+  h.players.forEach(p=>{const im=h.imps.includes(p.id);h.scores[p.id]=(h.scores[p.id]||0)+(crewWin?(im?0:1):(im?2:0))});
+  h.res={word:h.word,imps:h.imps,acc,crewWin};h.phase="end";bc();
+}
+function hostAgain(){const h=hs;h.phase="lobby";h.players.push(...h.queue);h.queue=[];h.imps=null;bc()}
+
+/* ---------- الواجهة ---------- */
+function render(){
+  if(!G){sh("home");return}
+  if(G.phase==="closed"){toast("المضيف سد الغرفة");setTimeout(()=>location.reload(),1500);return}
+  if(G.phase!==lastPh){if(G.phase==="vote")myVote=null;lastPh=G.phase}
+  if(G.round!==lastRd){lastRd=G.round;shown=false}
+  const mine=G.players.some(p=>p.id===me.id),isH=G.host===me.id;
+  if(G.phase==="lobby"||!mine)return lobby(mine,isH);
+  if(G.phase==="play")return play(isH);
+  if(G.phase==="vote")return vote(isH);
+  end(isH);
+}
+function lobby(mine,isH){
+  sh("lobby");$("rc").textContent=me.room;
+  const b=$("pl");b.innerHTML="";
+  G.players.forEach(p=>b.append(el("div","pl"+(p.id===me.id?" me":""),(p.id===G.host?"👑 ":"")+p.name)));
+  $("late").classList.toggle("hide",mine);
+  $("hostBox").classList.toggle("hide",!isH);$("waitBox").classList.toggle("hide",isH);
+  $("go").disabled=G.players.length<3;
+  $("cfgCat").value=G.cfg.cat;$("cfgImp").value=G.cfg.imp;$("cfgMins").value=G.cfg.mins;$("cfgHint").value=G.cfg.hint;
+}
+function roleBox(){
+  const r=me.r,b=$("rb");b.innerHTML="";
+  if(!r||r.r!==G.round){b.textContent="كنتسنى الدور…";return}
+  if(!shown){b.textContent="••••••";$("rt").textContent="👀 شوف الدور";return}
+  $("rt").textContent="🙈 خبّي";
+  if(r.imp){b.append(el("div","imp","🕵️ نتا الإمبوستر!"),el("p","muted",r.cat?"الموضوع: "+r.cat:"ما كتعرف والو. تخبّى مزيان!"))}
+  else b.append(el("div","muted","الكلمة السرية"),el("div","word",r.word));
+}
+function play(isH){
+  sh("play");roleBox();$("who").textContent=G.starter;$("gv").classList.toggle("hide",!isH);
+  if((!me.r||me.r.r!==G.round)&&Date.now()-lastReq>3000){lastReq=Date.now();pub(T("up"),{t:"role?",id:me.id})}
+}
+function vote(isH){
+  sh("vote");const b=$("vt");b.innerHTML="";
+  G.players.forEach(p=>{
+    if(p.id===me.id)return;
+    const x=el("button","vote"+(myVote===p.id?" sel":""),p.name);
+    x.onclick=()=>{myVote=p.id;pub(T("up"),{t:"vote",id:me.id,to:p.id});vote(isH)};b.append(x);
+  });
+  $("vc").textContent=(myVote?"صوّتتي ✔️ · ":"")+G.voted.length+" / "+G.players.length+" صوّتو";
+  $("fin").classList.toggle("hide",!isH);
+}
+function end(isH){
+  sh("end");const r=G.res;
+  $("vd").textContent=r.crewWin?"🎉 مسكتو الإمبوستر ("+nameOf(r.acc)+")!":(r.acc?"😈 الإمبوستر ربح! "+nameOf(r.acc)+" بريء":"😈 تعادل فالأصوات، الإمبوستر ربح!");
+  $("eword").textContent=r.word;$("eimps").textContent=r.imps.map(nameOf).join(" و ");
+  const b=$("board");b.innerHTML="";
+  G.players.slice().sort((a,c)=>(G.scores[c.id]||0)-(G.scores[a.id]||0)).forEach(p=>{const d=el("div","opt");d.append(el("span","",p.name),el("b","",G.scores[p.id]||0));b.append(d)});
+  $("again").classList.toggle("hide",!isH);$("wnext").classList.toggle("hide",isH);
+}
+setInterval(()=>{
+  if(G&&G.phase==="play"){const e=$("tm");if(tEnd==null){e.textContent="♾️";return}const l=Math.max(0,Math.round((tEnd-Date.now())/1000));e.textContent=String(Math.floor(l/60)).padStart(2,"0")+":"+String(l%60).padStart(2,"0")}
+},500);
+setInterval(()=>{
+  if(me.host&&hs&&hs.phase==="lobby"){const n=Date.now(),b=hs.players.length;hs.players=hs.players.filter(p=>p.id===hs.host||n-p.seen<22000);if(hs.players.length!==b)bc()}
+  else if(!me.host&&G&&me.room)join(0);
+},6000);
+
+/* ---------- الأزرار ---------- */
+const code=()=>{const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<5;i++)s+=a[Math.floor(Math.random()*a.length)];return s};
+const nm=()=>{const n=$("nm").value.trim();if(!n){toast("كتب سميتك");return""}me.name=n;return n};
+$("mk").onclick=()=>{
+  if(!nm())return;me.host=true;me.room=code();
+  hs={phase:"lobby",players:[{id:me.id,name:me.name,seen:Date.now()}],host:me.id,cfg:{cat:"🎲 مخلوط",imp:"1",mins:"3",hint:"1"},round:0,scores:{},votes:{},queue:[],endAt:null};begin();
+};
+$("jn").onclick=()=>{if(!nm())return;const c=$("cd").value.trim().toUpperCase();if(c.length<4){toast("كتب كود الغرفة");return}me.room=c;begin()};
+$("go").onclick=hostStart;$("gv").onclick=hostVote;$("fin").onclick=hostFinish;$("again").onclick=hostAgain;
+$("rt").onclick=()=>{shown=!shown;roleBox()};
+const cs=$("cfgCat");Object.keys(WORDS).filter(k=>k!=="✍️ كلماتي").forEach(k=>{const o=el("option","",k);o.value=k;cs.append(o)});
+[["cfgCat","cat"],["cfgImp","imp"],["cfgMins","mins"],["cfgHint","hint"]].forEach(a=>{$(a[0]).onchange=()=>{if(hs){hs.cfg[a[1]]=$(a[0]).value;bc()}}});
+$("shr").onclick=async()=>{
+  const u=location.origin+location.pathname+"?r="+me.room,tx="تعال نلعبو الإمبوستر المغربي! كود الغرفة: "+me.room;
+  try{if(navigator.share)await navigator.share({title:"الإمبوستر المغربي",text:tx,url:u});else{await navigator.clipboard.writeText(tx+" "+u);toast("تنسخ الرابط ✔️")}}catch(e){}
+};
+function bye(){if(!cli||!me.room)return;if(me.host&&hs)pub(T("state"),{phase:"closed"});else pub(T("up"),{t:"leave",id:me.id})}
+$("lv").onclick=()=>{bye();setTimeout(()=>location.reload(),250)};
+addEventListener("pagehide",bye);
+try{$("nm").value=localStorage.getItem("imp-name")||""}catch(e){}
+const q=new URLSearchParams(location.search).get("r");if(q)$("cd").value=q.toUpperCase();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
