@@ -14,6 +14,7 @@
 </style>
 </head>
 <body>
+<button class="ghost" id="gear">🔊</button>
 <div class="wrap">
   <h1>🌐 إمبوستر أونلاين</h1>
   <p class="sub" id="conn">كل واحد بهاتفو، و الكود يجمعكم</p>
@@ -72,8 +73,10 @@
 </div>
 <div id="toast" class="hide"></div>
 <script src="mqtt.min.js"></script>
+<script src="fx.js"></script>
 <script src="words.js"></script>
 <script>
+if(typeof sfx==="undefined"){window.sfx={play(){},sec(){},set(){},on:false};window.confetti=function(){};window.floaters=function(){}}
 if(typeof emoEl!=="function"){window.emoEl=function(x,c){const d=document.createElement("div");d.className=c;d.textContent=x;return d};window.emo=function(){return "🎯"}}
 const $=id=>document.getElementById(id),pick=a=>a[Math.floor(Math.random()*a.length)];
 const BR=["wss://broker.emqx.io:8084/mqtt","wss://broker.hivemq.com:8884/mqtt","wss://test.mosquitto.org:8081"];
@@ -156,10 +159,11 @@ function hostFinish(){
 function hostAgain(){const h=hs;h.phase="lobby";h.players.push(...h.queue);h.queue=[];h.imps=null;bc()}
 
 /* ---------- الواجهة ---------- */
+function fxPh(p){if(p==="play")sfx.play("start");else if(p==="vote")sfx.play("vote");else if(p==="end"){if(G.res&&G.res.crewWin){confetti();sfx.play("win")}else sfx.play("lose")}}
 function render(){
   if(!G){sh("home");return}
   if(G.phase==="closed"){toast("المضيف سد الغرفة");setTimeout(()=>location.reload(),1500);return}
-  if(G.phase!==lastPh){if(G.phase==="vote")myVote=null;lastPh=G.phase}
+  if(G.phase!==lastPh){if(G.phase==="vote")myVote=null;lastPh=G.phase;fxPh(G.phase)}
   if(G.round!==lastRd){lastRd=G.round;shown=false}
   const mine=G.players.some(p=>p.id===me.id),isH=G.host===me.id;
   if(G.phase==="lobby"||!mine)return lobby(mine,isH);
@@ -168,7 +172,7 @@ function render(){
   end(isH);
 }
 function lobby(mine,isH){
-  sh("lobby");$("rc").textContent=me.room;
+  sh("lobby");$("rc").textContent=me.room;if(G.players.length>(lobby.n||0))sfx.play("add");lobby.n=G.players.length;
   const b=$("pl");b.innerHTML="";
   G.players.forEach(p=>b.append(el("div","pl"+(p.id===me.id?" me":""),(p.id===G.host?"👑 ":"")+p.name)));
   $("late").classList.toggle("hide",mine);
@@ -179,8 +183,8 @@ function lobby(mine,isH){
 function roleBox(){
   const r=me.r,b=$("rb");b.innerHTML="";
   if(!r||r.r!==G.round){b.textContent="كنتسنى الدور…";return}
-  if(!shown){b.textContent="••••••";$("rt").textContent="👀 شوف الدور";return}
-  $("rt").textContent="🙈 خبّي";
+  if(!shown){b.className="role";b.textContent="••••••";$("rt").textContent="👀 شوف الدور";return}
+  $("rt").textContent="🙈 خبّي";b.className="role";void b.offsetWidth;b.className="role flip "+(r.imp?"impr":"crew");
   if(r.imp){b.append(emoEl("🕵️","emo shake"),el("div","imp","نتا الإمبوستر!"),el("p","muted",r.cat?"الموضوع: "+r.cat:"ما كتعرف والو. تخبّى مزيان!"))}
   else b.append(emoEl(emo(r.word,r.cat),"emo"),el("div","muted","الكلمة السرية"),el("div","word",r.word));
 }
@@ -207,7 +211,7 @@ function end(isH){
   $("again").classList.toggle("hide",!isH);$("wnext").classList.toggle("hide",isH);
 }
 setInterval(()=>{
-  if(G&&G.phase==="play"){const e=$("tm");if(tEnd==null){e.textContent="♾️";return}const l=Math.max(0,Math.round((tEnd-Date.now())/1000));e.textContent=String(Math.floor(l/60)).padStart(2,"0")+":"+String(l%60).padStart(2,"0")}
+  if(G&&G.phase==="play"){const e=$("tm");if(tEnd==null){e.textContent="♾️";return}const l=Math.max(0,Math.round((tEnd-Date.now())/1000));e.textContent=String(Math.floor(l/60)).padStart(2,"0")+":"+String(l%60).padStart(2,"0");e.classList.toggle("low",l<=10);sfx.sec(l)}
 },500);
 setInterval(()=>{
   if(me.host&&hs&&hs.phase==="lobby"){const n=Date.now(),b=hs.players.length;hs.players=hs.players.filter(p=>p.id===hs.host||n-p.seen<22000);if(hs.players.length!==b)bc()}
@@ -223,7 +227,7 @@ $("mk").onclick=()=>{
 };
 $("jn").onclick=()=>{if(!nm())return;const c=$("cd").value.trim().toUpperCase();if(c.length<4){toast("كتب كود الغرفة");return}me.room=c;begin()};
 $("go").onclick=hostStart;$("gv").onclick=hostVote;$("fin").onclick=hostFinish;$("again").onclick=hostAgain;
-$("rt").onclick=()=>{shown=!shown;roleBox()};
+$("rt").onclick=()=>{shown=!shown;if(shown&&me.r)sfx.play(me.r.imp?"imp":"crew");roleBox()};
 const cs=$("cfgCat");Object.keys(WORDS).filter(k=>k!=="✍️ كلماتي").forEach(k=>{const o=el("option","",k);o.value=k;cs.append(o)});
 [["cfgCat","cat"],["cfgImp","imp"],["cfgMins","mins"],["cfgHint","hint"]].forEach(a=>{$(a[0]).onchange=()=>{if(hs){hs.cfg[a[1]]=$(a[0]).value;bc()}}});
 $("shr").onclick=async()=>{
@@ -234,6 +238,7 @@ function bye(){if(!cli||!me.room)return;if(me.host&&hs)pub(T("state"),{phase:"cl
 $("lv").onclick=()=>{bye();setTimeout(()=>location.reload(),250)};
 addEventListener("pagehide",bye);
 try{$("nm").value=localStorage.getItem("imp-name")||""}catch(e){}
+$("gear").textContent=sfx.on?"🔊":"🔇";$("gear").onclick=()=>{sfx.set(!sfx.on);$("gear").textContent=sfx.on?"🔊":"🔇"};
 const q=new URLSearchParams(location.search).get("r");if(q)$("cd").value=q.toUpperCase();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>

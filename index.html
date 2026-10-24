@@ -20,6 +20,7 @@
   <div class="opt"><span>المظهر</span><select id="stTheme"><option value="auto">أوتوماتيك</option><option value="light">فاتح</option><option value="dark">داكن</option></select></div>
   <div class="opt"><span>حجم الخط</span><select id="stSize"><option value="0.9">صغير</option><option value="1">عادي</option><option value="1.15">كبير</option></select></div>
   <div class="opt"><span>اللون الرئيسي</span><span class="chips" id="stColors"></span></div>
+  <div class="opt"><span>الأصوات</span><select id="stSnd"><option value="1">مفعّلة</option><option value="0">موقّفة</option></select></div>
   <div class="opt"><span>الاهتزاز</span><select id="stVib"><option value="1">مفعّل</option><option value="0">موقّف</option></select></div>
   <div class="opt"><span>عدد الإمبوسترات يبان للجميع</span><select id="stShown"><option value="0">لا</option><option value="1">إيه</option></select></div>
   <div class="opt"><span>نقاط ربح الفريق</span><select id="stCp"><option>1</option><option>2</option><option>3</option></select></div>
@@ -106,8 +107,10 @@
   </section>
 </div>
 
+<script src="fx.js"></script>
 <script src="words.js"></script>
 <script>
+if(typeof sfx==="undefined"){window.sfx={play(){},sec(){},set(){},on:false};window.confetti=function(){};window.floaters=function(){}}
 if(typeof emoEl!=="function"){window.emoEl=function(x,c){const d=document.createElement("div");d.className=c;d.textContent=x;return d};window.emo=function(){return "🎯"}}
 const $=id=>document.getElementById(id);
 const S={players:[],cat:"🎲 مخلوط",roles:[],impostors:[],word:"",idx:0,sel:null,tick:null,scores:{}};
@@ -139,7 +142,7 @@ function addPlayer(){
   const v=$("name").value.trim();if(!v)return;
   if(S.players.some(p=>p===v)){$("name").value="";return}
   if(S.players.length>=20)return;
-  S.players.push(v);$("name").value="";save();renderSetup();$("name").focus();
+  S.players.push(v);$("name").value="";save();renderSetup();$("name").focus();sfx.play("add");
 }
 $("add").onclick=addPlayer;
 $("name").addEventListener("keydown",e=>{if(e.key==="Enter")addPlayer()});
@@ -152,7 +155,7 @@ function startGame(){
   S.realCat=cat;S.word=pick(list);
   const n=Math.min(+$("impn").value,Math.floor((S.players.length-1)/2)||1);
   const ids=S.players.map((_,i)=>i).sort(()=>Math.random()-.5);
-  S.impostors=ids.slice(0,n);S.idx=0;S.sel=null;
+  S.impostors=ids.slice(0,n);S.idx=0;S.sel=null;sfx.play("start");
   nextPass();
 }
 function nextPass(){
@@ -162,7 +165,7 @@ function nextPass(){
   $("roleBox").classList.add("hide");$("nextp").classList.add("hide");$("reveal").classList.remove("hide");
   show("pass");
 }
-$("reveal").onclick=()=>{vib(40);
+$("reveal").onclick=()=>{vib(40);sfx.play(S.impostors.includes(S.idx)?"imp":"crew");
   const rb=$("roleBox");rb.innerHTML="";
   if(S.impostors.includes(S.idx)){
     const a=document.createElement("div");a.className="imp";a.textContent="نتا الإمبوستر!";rb.append(emoEl("🕵️","emo shake"),a);
@@ -172,7 +175,7 @@ $("reveal").onclick=()=>{vib(40);
     const t=document.createElement("div");t.className="muted";t.textContent="الكلمة السرية";
     const w=document.createElement("div");w.className="word";w.textContent=S.word;rb.append(emoEl(emo(S.word,S.realCat),"emo"),t,w);
   }
-  rb.classList.remove("hide");$("reveal").classList.add("hide");$("nextp").classList.remove("hide");
+  rb.classList.remove("hide","flip","impr","crew");void rb.offsetWidth;rb.classList.add("flip",S.impostors.includes(S.idx)?"impr":"crew");$("reveal").classList.add("hide");$("nextp").classList.remove("hide");
   $("nextp").textContent=S.idx===S.players.length-1?"🙈 خبّي و بدا النقاش":"🙈 خبّي و عطي للي من بعد";
 };
 $("nextp").onclick=()=>{S.idx++;nextPass()};
@@ -180,14 +183,14 @@ $("nextp").onclick=()=>{S.idx++;nextPass()};
 function startPlay(){
   $("starter").textContent=pick(S.players);
   let left=(+$("mins").value)*60;
-  const draw=()=>{const m=String(Math.floor(left/60)).padStart(2,"0"),s=String(left%60).padStart(2,"0");$("timer").textContent=m+":"+s};
+  const draw=()=>{const m=String(Math.floor(left/60)).padStart(2,"0"),s=String(left%60).padStart(2,"0");$("timer").textContent=m+":"+s;$("timer").classList.toggle("low",left>0&&left<=10);sfx.sec(left)};
   draw();clearInterval(S.tick);
   if(left>0)S.tick=setInterval(()=>{left--;draw();if(left<=0){clearInterval(S.tick);vib([300,150,300])}},1000);
   if(!left)$("timer").textContent="♾️";
   $("impinfo").textContent=ST.shown==="1"?"عدد الإمبوسترات: "+S.impostors.length:"";
   show("play");
 }
-$("goVote").onclick=()=>{
+$("goVote").onclick=()=>{sfx.play("vote");
   clearInterval(S.tick);S.sel=null;$("confirm").disabled=true;
   const v=$("votes");v.innerHTML="";
   S.players.forEach((n,i)=>{const b=document.createElement("button");b.className="vote";b.textContent=n;
@@ -199,7 +202,7 @@ $("confirm").onclick=()=>{
   $("verdict").textContent=caught?"🎉 مسكتو الإمبوستر ("+S.players[S.sel]+")!":"😈 الإمبوستر ربح! "+S.players[S.sel]+" بريء";
   $("theword").textContent=emo(S.word,S.realCat)+" "+S.word;
   $("imps").textContent=S.impostors.map(i=>S.players[i]).join(" و ");
-  $("guessBox").classList.toggle("hide",!caught);if(!caught)award(true);else board();
+  $("guessBox").classList.toggle("hide",!caught);if(!caught)award(true);else board();if(caught){confetti();sfx.play("win")}else sfx.play("lose");
   show("end");
 };
 $("start").onclick=startGame;
@@ -220,8 +223,8 @@ $("gear").onclick=()=>$("modal").classList.remove("hide");
 $("stClose").onclick=()=>$("modal").classList.add("hide");
 $("modal").onclick=e=>{if(e.target.id==="modal")$("modal").classList.add("hide")};
 $("stReset").onclick=()=>{if(confirm("متأكد بغيتي تمسح كلشي؟")){try{localStorage.clear()}catch(e){}location.reload()}};
-$("introGo").onclick=()=>$("intro").classList.add("hide");
-renderCols();applyST();renderSetup();
+$("introGo").onclick=()=>{sfx.play("start");$("intro").classList.add("hide")};
+renderCols();applyST();renderSetup();$("stSnd").value=sfx.on?"1":"0";$("stSnd").onchange=()=>sfx.set($("stSnd").value==="1");floaters($("intro"));
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
