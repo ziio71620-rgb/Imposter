@@ -108,6 +108,7 @@
 
 <script src="words.js"></script>
 <script>
+if(typeof emoEl!=="function"){window.emoEl=function(x,c){const d=document.createElement("div");d.className=c;d.textContent=x;return d};window.emo=function(){return "🎯"}}
 const $=id=>document.getElementById(id);
 const S={players:[],cat:"🎲 مخلوط",roles:[],impostors:[],word:"",idx:0,sel:null,tick:null,scores:{}};
 let ST={theme:"auto",size:"1",color:"",vib:"1",shown:"0",cp:"1",ip:"2",impn:"1",mins:"3",hint:"1",cat:""};

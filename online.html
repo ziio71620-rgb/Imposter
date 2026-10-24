@@ -74,6 +74,7 @@
 <script src="mqtt.min.js"></script>
 <script src="words.js"></script>
 <script>
+if(typeof emoEl!=="function"){window.emoEl=function(x,c){const d=document.createElement("div");d.className=c;d.textContent=x;return d};window.emo=function(){return "🎯"}}
 const $=id=>document.getElementById(id),pick=a=>a[Math.floor(Math.random()*a.length)];
 const BR=["wss://broker.emqx.io:8084/mqtt","wss://broker.hivemq.com:8884/mqtt","wss://test.mosquitto.org:8081"];
 let ST={};try{ST=JSON.parse(localStorage.getItem("imp-st")||"{}")}catch(e){}
