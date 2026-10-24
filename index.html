@@ -164,12 +164,12 @@ function nextPass(){
 $("reveal").onclick=()=>{vib(40);
   const rb=$("roleBox");rb.innerHTML="";
   if(S.impostors.includes(S.idx)){
-    const a=document.createElement("div");a.className="imp";a.textContent="🕵️ نتا الإمبوستر!";rb.append(a);
+    const a=document.createElement("div");a.className="imp";a.textContent="نتا الإمبوستر!";rb.append(emoEl("🕵️","emo shake"),a);
     const m=document.createElement("p");m.className="muted";
     m.textContent=$("hint").value==="1"?"الموضوع: "+S.realCat:"ما كتعرف والو. تخبّى مزيان!";rb.append(m);
   }else{
     const t=document.createElement("div");t.className="muted";t.textContent="الكلمة السرية";
-    const w=document.createElement("div");w.className="word";w.textContent=S.word;rb.append(t,w);
+    const w=document.createElement("div");w.className="word";w.textContent=S.word;rb.append(emoEl(emo(S.word,S.realCat),"emo"),t,w);
   }
   rb.classList.remove("hide");$("reveal").classList.add("hide");$("nextp").classList.remove("hide");
   $("nextp").textContent=S.idx===S.players.length-1?"🙈 خبّي و بدا النقاش":"🙈 خبّي و عطي للي من بعد";
@@ -196,7 +196,7 @@ $("goVote").onclick=()=>{
 $("confirm").onclick=()=>{
   const caught=S.impostors.includes(S.sel);
   $("verdict").textContent=caught?"🎉 مسكتو الإمبوستر ("+S.players[S.sel]+")!":"😈 الإمبوستر ربح! "+S.players[S.sel]+" بريء";
-  $("theword").textContent=S.word;
+  $("theword").textContent=emo(S.word,S.realCat)+" "+S.word;
   $("imps").textContent=S.impostors.map(i=>S.players[i]).join(" و ");
   $("guessBox").classList.toggle("hide",!caught);if(!caught)award(true);else board();
   show("end");

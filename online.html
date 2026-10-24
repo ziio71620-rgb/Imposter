@@ -150,7 +150,7 @@ function hostFinish(){
   const m=Math.max(0,...Object.values(c)),top=Object.keys(c).filter(k=>c[k]===m&&m>0);
   const acc=top.length===1?top[0]:null,crewWin=!!acc&&h.imps.includes(acc);
   h.players.forEach(p=>{const im=h.imps.includes(p.id);h.scores[p.id]=(h.scores[p.id]||0)+(crewWin?(im?0:1):(im?2:0))});
-  h.res={word:h.word,imps:h.imps,acc,crewWin};h.phase="end";bc();
+  h.res={word:h.word,cat:h.cat,imps:h.imps,acc,crewWin};h.phase="end";bc();
 }
 function hostAgain(){const h=hs;h.phase="lobby";h.players.push(...h.queue);h.queue=[];h.imps=null;bc()}
 
@@ -180,8 +180,8 @@ function roleBox(){
   if(!r||r.r!==G.round){b.textContent="كنتسنى الدور…";return}
   if(!shown){b.textContent="••••••";$("rt").textContent="👀 شوف الدور";return}
   $("rt").textContent="🙈 خبّي";
-  if(r.imp){b.append(el("div","imp","🕵️ نتا الإمبوستر!"),el("p","muted",r.cat?"الموضوع: "+r.cat:"ما كتعرف والو. تخبّى مزيان!"))}
-  else b.append(el("div","muted","الكلمة السرية"),el("div","word",r.word));
+  if(r.imp){b.append(emoEl("🕵️","emo shake"),el("div","imp","نتا الإمبوستر!"),el("p","muted",r.cat?"الموضوع: "+r.cat:"ما كتعرف والو. تخبّى مزيان!"))}
+  else b.append(emoEl(emo(r.word,r.cat),"emo"),el("div","muted","الكلمة السرية"),el("div","word",r.word));
 }
 function play(isH){
   sh("play");roleBox();$("who").textContent=G.starter;$("gv").classList.toggle("hide",!isH);
@@ -200,7 +200,7 @@ function vote(isH){
 function end(isH){
   sh("end");const r=G.res;
   $("vd").textContent=r.crewWin?"🎉 مسكتو الإمبوستر ("+nameOf(r.acc)+")!":(r.acc?"😈 الإمبوستر ربح! "+nameOf(r.acc)+" بريء":"😈 تعادل فالأصوات، الإمبوستر ربح!");
-  $("eword").textContent=r.word;$("eimps").textContent=r.imps.map(nameOf).join(" و ");
+  $("eword").textContent=emo(r.word,r.cat)+" "+r.word;$("eimps").textContent=r.imps.map(nameOf).join(" و ");
   const b=$("board");b.innerHTML="";
   G.players.slice().sort((a,c)=>(G.scores[c.id]||0)-(G.scores[a.id]||0)).forEach(p=>{const d=el("div","opt");d.append(el("span","",p.name),el("b","",G.scores[p.id]||0));b.append(d)});
   $("again").classList.toggle("hide",!isH);$("wnext").classList.toggle("hide",isH);

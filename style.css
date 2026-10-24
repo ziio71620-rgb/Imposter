@@ -46,3 +46,8 @@ button:disabled{opacity:.45}
 #modal{position:fixed;inset:0;z-index:40;background:#0008;display:flex;align-items:flex-end;justify-content:center}
 #modal .sheet{background:var(--bg);color:var(--fg);width:100%;max-width:480px;max-height:88%;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
 #gear{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:10px;z-index:5;padding:6px 10px}
+
+.emo{font-size:88px;line-height:1.2;animation:pop .5s ease both,bob 2s .5s ease-in-out infinite}
+.emo.shake{animation:pop .5s ease both,shake .6s .5s ease-in-out infinite alternate}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px) rotate(4deg)}}
+@keyframes shake{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
